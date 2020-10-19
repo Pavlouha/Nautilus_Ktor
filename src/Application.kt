@@ -1,5 +1,8 @@
 package com.pavlouha
 
+import com.pavlouha.dao.AuthDao
+import com.pavlouha.dao.GunDao
+import com.pavlouha.dao.StateDao
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -36,8 +39,49 @@ fun Application.module(testing: Boolean = false) {
             call.respondText("HELLO, WORLD!", contentType = ContentType.Text.Plain)
         }
 
-        get("/json/gson") {
-            call.respond(mapOf("hello" to "world"))
+        /* STATE */
+        get("/gunstate") {
+            call.respond(StateDao.getGunInOrderState())
         }
+
+        get("/orderstate") {
+            call.respond(StateDao.getOrderState())
+        }
+
+        /* Auth Table */
+        get("/auths") {
+           call.respond(AuthDao.get())
+        }
+
+        delete("/auths") {
+            call.respond(AuthDao.delete())
+        }
+
+        /* Gun */
+        get("/gun") {
+            call.respond(GunDao.get())
+        }
+
+        post ("/gun") {
+            val parameters = call.receiveParameters()
+
+            val vendorCode = parameters["vendorCode"]
+            val price = parameters["price"]?.toInt()
+
+            vendorCode?.let { it1 ->
+                if (price != null) {
+                    GunDao.insert(it1, price)
+                }
+            }?.let { it2 -> call.respond(it2) }
+        }
+
+        delete("/gun") {
+            val parameters = call.receiveParameters()
+
+            val id = parameters["id"]?.toInt()
+            id?.let { it1 -> GunDao.delete(it1) }?.let { it2 -> call.respond(it2) }
+        }
+
+
     }
 }

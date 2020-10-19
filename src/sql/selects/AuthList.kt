@@ -7,6 +7,8 @@ import java.util.ArrayList
 
 object AuthList {
 
+    //TODO ВСЕ ОШЫБКИ НА АНГЛИЙСКИЙ! ДЕЛАЙ@РАБОТАЙ
+
     @JvmStatic
     fun list(): ArrayList<AuthClass> {
         val st: Statement?

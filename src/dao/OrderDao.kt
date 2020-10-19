@@ -1,16 +1,16 @@
 package com.pavlouha.dao
 
-object UserDao {
+object OrderDao {
 
     fun get() {
 
     }
 
-    fun insert() {
+    fun update() {
 
     }
 
-    fun delete() {
+    fun insert() {
 
     }
 }

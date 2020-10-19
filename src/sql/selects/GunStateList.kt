@@ -17,7 +17,7 @@ object GunStateList {
             val resultSet = st.executeQuery("SELECT * FROM mpiDB.GUN_STATE")
             while (resultSet.next()) {
                 states.add(
-                    GunState(resultSet.getInt("ID"), resultSet.getString("TITLE"))
+                    GunState(resultSet.getInt("ID"), resultSet.getString("STATE"))
                 )
             }
         } catch (e: Exception) {
