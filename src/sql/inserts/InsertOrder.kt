@@ -13,7 +13,7 @@ object InsertOrder {
             newCustomerStatement.setInt(1, order.id)
             newCustomerStatement.setInt(2, order.customer.id)
             newCustomerStatement.setString(3, order.commentary)
-            newCustomerStatement.setInt(4, order.user.id)
+            newCustomerStatement.setInt(4, order.userId)
             newCustomerStatement.setDate(5, order.orderDate)
             newCustomerStatement.setInt(6, 0)
             newCustomerStatement.execute()

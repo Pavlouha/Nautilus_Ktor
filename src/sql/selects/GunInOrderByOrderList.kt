@@ -32,7 +32,7 @@ object GunInOrderByOrderList {
                 )
             }
         } catch (e: Exception) {
-            println("Gun")
+            println("GunInOrderByOrderListError")
         }
         return result
     }

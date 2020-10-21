@@ -10,7 +10,7 @@ object UserList {
 
     @JvmStatic
     fun userList(): ArrayList<User?> {
-        var st: Statement? = null
+        val st: Statement?
         val users = ArrayList<User?>()
         try {
             val conn = Connection.connection
@@ -24,7 +24,7 @@ object UserList {
                 userSet.getString("CELL")))
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка пользователей")
+            println("UserListError")
         }
         return users
     }

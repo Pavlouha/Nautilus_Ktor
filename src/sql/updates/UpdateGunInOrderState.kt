@@ -1,7 +1,6 @@
 package com.pavlouha.sql.updates
 
 import com.pavlouha.sql.Connection
-import java.sql.Statement
 
 object UpdateGunInOrderState {
 
@@ -9,10 +8,10 @@ object UpdateGunInOrderState {
         var response = false
         try {
             val conn = Connection.connection
-            val newCustomerStatement = conn.prepareStatement("update mpiDB.GUNS_IN_ORDER set 'GUN_STATE_ID' = ? where 'ORDER_ID' = ?;")
-            newCustomerStatement.setInt(1, gunStateId)
-            newCustomerStatement.setInt(2, orderId)
-            newCustomerStatement.execute()
+            val newStatement = conn.prepareStatement("update mpiDB.GUNS_IN_ORDER set GUN_STATE_ID = ? where ORDER_ID = ?;")
+            newStatement.setInt(1, gunStateId)
+            newStatement.setInt(2, orderId)
+            newStatement.execute()
             response = true
         } catch (e: Exception) {
             print(e.printStackTrace())

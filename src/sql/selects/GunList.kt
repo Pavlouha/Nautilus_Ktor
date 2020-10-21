@@ -9,7 +9,7 @@ object GunList {
 
     @JvmStatic
     fun list(): ArrayList<Gun?> {
-        var st: Statement?
+        val st: Statement?
         val guns = ArrayList<Gun?>()
         try {
             val conn = Connection.connection
@@ -22,7 +22,7 @@ object GunList {
                 )
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка пушек")
+            println("GunListError")
         }
         return guns
     }
