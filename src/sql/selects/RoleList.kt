@@ -19,7 +19,7 @@ object RoleList {
                 roles.add(Role(roleSet.getInt("ID"), roleSet.getString("TITLE")))
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка ролей")
+            println("RoleListError")
         }
         return roles
     }

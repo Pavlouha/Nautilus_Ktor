@@ -1,9 +1,12 @@
 package com.pavlouha
 
 import com.pavlouha.dao.*
+import com.pavlouha.jwtThings.JwtConfig
+import com.pavlouha.jwtThings.JwtUser
 import com.pavlouha.models.*
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
@@ -20,6 +23,19 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
     install(Authentication) {
+        jwt {
+            verifier(JwtConfig.verifier)
+            realm = "com.pavlouha"
+            validate {
+                val name = it.payload.getClaim("name").asString()
+                val password = it.payload.getClaim("password").asString()
+                if(name != null && password != null){
+                    JwtUser(name, password)
+                }else{
+                    null
+                }
+            }
+        }
     }
 
     install(ContentNegotiation) {
@@ -33,7 +49,16 @@ fun Application.module(testing: Boolean = false) {
             call.respondText("HELLO, WORLD!", contentType = ContentType.Text.Plain)
         }
 
-        /* STATE */
+        //TODO сделать аутентификацию
+        /** TOKEN GEN */
+        post("/generatetoken"){
+            val user = call.receive<JwtUser>()
+            println("${user.name}, pwd = ${user.password}")
+            val token = JwtConfig.generateToken(user)
+            call.respond(token)
+        }
+
+        /** STATE */
         get("/gunstate") {
             call.respond(StateDao.getGunInOrderState())
         }
@@ -51,7 +76,7 @@ fun Application.module(testing: Boolean = false) {
             call.respond(AuthDao.delete())
         }
 
-        /* GUN */
+        /** GUN */
         get("/gun") {
             call.respond(GunDao.get())
         }
@@ -76,7 +101,7 @@ fun Application.module(testing: Boolean = false) {
             id?.let { it1 -> GunDao.delete(it1) }?.let { it2 -> call.respond(it2) }
         }
 
-        /* GUNINORDER */
+        /** GUNINORDER */
         get("/guninorder") {
             val parameters = call.receiveParameters()
 
@@ -95,7 +120,7 @@ fun Application.module(testing: Boolean = false) {
             call.respond(GunInOrderDao.update(orderId!!, stateId!!))
         }
 
-        /* USER */
+        /** USER */
 
         get("/user") {
             call.respond(UserDao.get())
@@ -122,7 +147,7 @@ fun Application.module(testing: Boolean = false) {
             call.respond(UserDao.delete(id))
         }
 
-        /* ORDER */
+        /** ORDER */
         get("/order") {
             call.respond(OrderDao.get())
         }

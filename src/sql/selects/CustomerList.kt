@@ -22,7 +22,7 @@ object CustomerList {
                 )
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка клиентов")
+            println("CustomerListError")
         }
         return customers
     }

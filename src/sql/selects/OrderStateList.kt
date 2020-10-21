@@ -20,7 +20,7 @@ object OrderStateList {
                 states.add(OrderState(resultSet.getInt("ID"), resultSet.getString("STATE")))
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка состояний")
+            println("OrderStateListError")
         }
         return states
     }

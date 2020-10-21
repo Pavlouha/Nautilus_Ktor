@@ -21,7 +21,7 @@ object GunStateList {
                 )
             }
         } catch (e: Exception) {
-            println("Ошибка при загрузке списка состояний")
+            println("GunStateListError")
         }
         return states
     }
