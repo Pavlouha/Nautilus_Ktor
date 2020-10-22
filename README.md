@@ -1,5 +1,5 @@
 # Nautilus_Ktor
-### New Kotlin-based backend part of Nautilus project
+### New Kotlin-based simple backend. Part of Nautilus project.
 
 Документы в стиле RUP лежат по адресу https://drive.google.com/drive/folders/1WAD3ALI2z6S3arp4jSPMZaI_yLeFH6lw и находятся в активном процессе написания, исправления и дополнения.
 
@@ -10,9 +10,9 @@
 - [x] SQL запросы
 - [x] DAO
 - [x] Маршруты
-- [ ] Аутентификация
-- [ ] Тестирование
+- [x] Аутентификация (Ktor JWT)
+- [x] Тестирование (часть, остальное напишу позже)
 - [ ] Развёртывание (тестовое)
 
-#### Клиент
+#### Клиент: мобильное приложение (скорее всего, Dart/Flutter)
 Позже
