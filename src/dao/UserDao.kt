@@ -3,6 +3,7 @@ package com.pavlouha.dao
 import com.pavlouha.models.User
 import com.pavlouha.sql.deletes.UserDelete
 import com.pavlouha.sql.inserts.InsertUser
+import com.pavlouha.sql.selects.UserAuthentication
 import com.pavlouha.sql.selects.UserList
 import java.util.ArrayList
 
@@ -18,5 +19,13 @@ object UserDao {
 
     fun delete(id: Int): Boolean {
         return UserDelete.delete(id)
+    }
+
+    fun authenticate(login: String, password: String): User? {
+        val user = UserAuthentication.userList(login, password)
+        if (user != null) {
+            return user
+        }
+        return null
     }
 }

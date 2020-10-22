@@ -2,7 +2,7 @@ package com.pavlouha
 
 import com.pavlouha.dao.*
 import com.pavlouha.jwtThings.JwtConfig
-import com.pavlouha.jwtThings.JwtUser
+import com.pavlouha.jwtThings.model.JwtUser
 import com.pavlouha.models.*
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -30,7 +30,7 @@ fun Application.module(testing: Boolean = false) {
                 val name = it.payload.getClaim("name").asString()
                 val password = it.payload.getClaim("password").asString()
                 if(name != null && password != null){
-                    JwtUser(name, password)
+                    JwtUser(name, password )
                 }else{
                     null
                 }
@@ -49,133 +49,145 @@ fun Application.module(testing: Boolean = false) {
             call.respondText("HELLO, WORLD!", contentType = ContentType.Text.Plain)
         }
 
-        //TODO сделать аутентификацию
         /** TOKEN GEN */
         post("/generatetoken"){
             val user = call.receive<JwtUser>()
-            println("${user.name}, pwd = ${user.password}")
-            val token = JwtConfig.generateToken(user)
-            call.respond(token)
-        }
+            val result = UserDao.authenticate(user.name, user.password)
+            if (result != null) {
+                println("${user.name}, pwd = ${user.password}")
+                val token = JwtConfig.generateToken(user)
 
-        /** STATE */
-        get("/gunstate") {
-            call.respond(StateDao.getGunInOrderState())
-        }
-
-        get("/orderstate") {
-            call.respond(StateDao.getOrderState())
-        }
-
-        /* AUTH TABLE */
-        get("/auths") {
-           call.respond(AuthDao.get())
-        }
-
-        delete("/auths") {
-            call.respond(AuthDao.delete())
-        }
-
-        /** GUN */
-        get("/gun") {
-            call.respond(GunDao.get())
-        }
-
-        post("/gun") {
-            val parameters = call.receiveParameters()
-
-            val vendorCode = parameters["vendorCode"]
-            val price = parameters["price"]?.toInt()
-
-            vendorCode?.let { it1 ->
-                if (price != null) {
-                    GunDao.insert(it1, price)
-                }
-            }?.let { it2 -> call.respond(it2) }
-        }
-
-        delete("/gun") {
-            val parameters = call.receiveParameters()
-
-            val id = parameters["id"]?.toInt()
-            id?.let { it1 -> GunDao.delete(it1) }?.let { it2 -> call.respond(it2) }
-        }
-
-        /** GUNINORDER */
-        get("/guninorder") {
-            val parameters = call.receiveParameters()
-
-            val id = parameters["id"]
-            if (id != null) {
-                call.respond(GunInOrderDao.get(id.toInt()))
+                call.respond(mapOf("token" to token, "id" to result.id, "login" to result.login,
+                "password" to result.password, "username" to result.username, "cell" to result.cell,
+                "roleId" to result.role.id, "title" to result.role.title))
             }
-           // id?.let { it1 -> GunInOrderDao.get(it1) }?.let { it2 -> call.respond(it2) }
         }
 
-        patch("/guninorder") {
-            val parameters = call.receiveParameters()
+        authenticate {
+            /** STATE */
+            get("/gunstate") {
+                call.respond(StateDao.getGunInOrderState())
+            }
 
-            val orderId = parameters["orderId"]?.toInt()
-            val stateId = parameters["stateId"]?.toInt()
-            call.respond(GunInOrderDao.update(orderId!!, stateId!!))
-        }
+            get("/orderstate") {
+                call.respond(StateDao.getOrderState())
+            }
 
-        /** USER */
+            /** AUTH TABLE */
+            get("/auths") {
+                call.respond(AuthDao.get())
+            }
 
-        get("/user") {
-            call.respond(UserDao.get())
-        }
+            delete("/auths") {
+                call.respond(AuthDao.delete())
+            }
 
-        post("/user") {
-            val parameters = call.receiveParameters()
+            /** GUN */
+            get("/gun") {
+                call.respond(GunDao.get())
+            }
 
-            val id = parameters["id"]!!.toInt()
-            val login = parameters["login"]
-            val password = parameters["password"]
-            val roleId = parameters["roleId"]!!.toInt()
-            val roleName = parameters["roleName"]
-            val username = parameters["username"]
-            val cell = parameters["cell"]
+            post("/gun") {
+                val parameters = call.receiveParameters()
 
-            call.respond(UserDao.insert(User(id, login!!, username!!, password!!, Role(roleId, roleName!!), cell!!)))
-        }
+                val vendorCode = parameters["vendorCode"]
+                val price = parameters["price"]?.toInt()
 
-        delete("/user") {
-            val parameters = call.receiveParameters()
+                vendorCode?.let { it1 ->
+                    if (price != null) {
+                        GunDao.insert(it1, price)
+                    }
+                }?.let { it2 -> call.respond(it2) }
+            }
 
-            val id = parameters["id"]!!.toInt()
-            call.respond(UserDao.delete(id))
-        }
+            delete("/gun") {
+                val parameters = call.receiveParameters()
 
-        /** ORDER */
-        get("/order") {
-            call.respond(OrderDao.get())
-        }
+                val id = parameters["id"]?.toInt()
+                id?.let { it1 -> GunDao.delete(it1) }?.let { it2 -> call.respond(it2) }
+            }
 
-        post("/order") {
-            val parameters = call.receiveParameters()
+            /** GUNINORDER */
+            get("/guninorder") {
+                val parameters = call.receiveParameters()
 
-            val id = parameters["id"]!!.toInt()
-            val customerId = parameters["customerId"]!!.toInt()
-            val commentary = parameters["commentary"]
-            val userId = parameters["userId"]!!.toInt()
-            val orderDate = parameters["orderDate"]
+                val id = parameters["id"]
+                if (id != null) {
+                    call.respond(GunInOrderDao.get(id.toInt()))
+                }
+                // id?.let { it1 -> GunInOrderDao.get(it1) }?.let { it2 -> call.respond(it2) }
+            }
 
-            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            patch("/guninorder") {
+                val parameters = call.receiveParameters()
 
-            call.respond(OrderDao.insert(Order(
+                val orderId = parameters["orderId"]?.toInt()
+                val stateId = parameters["stateId"]?.toInt()
+                call.respond(GunInOrderDao.update(orderId!!, stateId!!))
+            }
+
+            /** USER */
+
+            get("/user") {
+                call.respond(UserDao.get())
+            }
+
+            post("/user") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+                val login = parameters["login"]
+                val password = parameters["password"]
+                val roleId = parameters["roleId"]!!.toInt()
+                val roleName = parameters["roleName"]
+                val username = parameters["username"]
+                val cell = parameters["cell"]
+
+                call.respond(UserDao.insert(User(id, login!!, username!!, password!!, Role(roleId, roleName!!), cell!!)))
+            }
+
+            delete("/user") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+                call.respond(UserDao.delete(id))
+            }
+
+            /** ORDER */
+            get("/order") {
+                call.respond(OrderDao.get())
+            }
+
+            post("/order") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+                val customerId = parameters["customerId"]!!.toInt()
+                val commentary = parameters["commentary"]
+                val userId = parameters["userId"]!!.toInt()
+                val orderDate = parameters["orderDate"]
+
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+                call.respond(OrderDao.insert(Order(
                     id, Customer(customerId, "", "", ""),
                     commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, "")
-            )))
+                )))
+            }
+
+            patch("/order") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+                val stateId = parameters["stateId"]?.toInt()
+                call.respond(OrderDao.updateState(id, stateId!!))
+            }
+
+            /** ROLE */
+            patch("/role") {
+
+                call.respond(RoleDao.get())
+            }
         }
-
-        patch("/order") {
-            val parameters = call.receiveParameters()
-
-            val id = parameters["id"]!!.toInt()
-            val stateId = parameters["stateId"]?.toInt()
-            call.respond(OrderDao.updateState(id, stateId!!))
-        }
-
     }
 }

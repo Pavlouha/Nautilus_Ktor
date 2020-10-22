@@ -1,6 +1,6 @@
 package com.pavlouha
 
-import com.pavlouha.jwtThings.JwtUser
+import com.pavlouha.jwtThings.model.JwtUser
 import io.ktor.application.ApplicationCall
 import io.ktor.auth.authentication
 

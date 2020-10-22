@@ -1,4 +1,4 @@
-package com.pavlouha.jwtThings
+package com.pavlouha.jwtThings.model
 
 import io.ktor.auth.*
 

@@ -3,6 +3,7 @@ package com.pavlouha.jwtThings
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import com.pavlouha.jwtThings.model.JwtUser
 import java.util.*
 
 object JwtConfig {

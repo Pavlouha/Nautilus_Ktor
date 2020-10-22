@@ -12,7 +12,7 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.pavlouha'
-version '0.0.1'
+version '0.0.3'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
 sourceSets {
@@ -40,4 +40,35 @@ dependencies {
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     implementation ("mysql:mysql-connector-java:8.0.21")
 
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'com.pavlouha.ApplicationKt'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+//Get dependencies from Maven central repository
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://kotlin.bintray.com/ktor' }
+}
+//Project dependencies
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "io.ktor:ktor-server-netty:$ktor_version"
+    compile "ch.qos.logback:logback-classic:$logback_version"
+    compile "io.ktor:ktor-server-core:$ktor_version"
+    compile "io.ktor:ktor-auth:$ktor_version"
+    compile "io.ktor:ktor-auth-jwt:$ktor_version"
+    compile "io.ktor:ktor-gson:$ktor_version"
+    compile "io.ktor:ktor-network:$ktor_version"
+    testImplementation "io.ktor:ktor-server-tests:$ktor_version"
+    compile ("mysql:mysql-connector-java:8.0.21")
 }
