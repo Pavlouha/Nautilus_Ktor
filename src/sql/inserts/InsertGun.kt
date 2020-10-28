@@ -10,7 +10,7 @@ object InsertGun {
         try {
             val conn = Connection.connection
             val newStatement = conn.prepareStatement("INSERT INTO mpiDB.GUNS VALUES ( ?, ?, ?)")
-            newStatement.setInt(1, gun.id)
+            newStatement.setInt(1, gun.gunId)
             newStatement.setString(2, gun.vendor_code)
             newStatement.setInt(3, gun.price)
             newStatement.execute()

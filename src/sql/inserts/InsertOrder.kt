@@ -10,8 +10,8 @@ object InsertOrder {
         try {
             val conn = Connection.connection
             val newCustomerStatement = conn.prepareStatement("INSERT INTO mpiDB.ORDERS VALUES ( ?, ?, ?,?, ?, ? )")
-            newCustomerStatement.setInt(1, order.id)
-            newCustomerStatement.setInt(2, order.customer.id)
+            newCustomerStatement.setInt(1, order.orderId)
+            newCustomerStatement.setInt(2, order.customer.customerId)
             newCustomerStatement.setString(3, order.commentary)
             newCustomerStatement.setInt(4, order.userId)
             newCustomerStatement.setDate(5, order.orderDate)

@@ -32,7 +32,7 @@ object UserDao {
         if (user != null) {
             var id = AuthCounter.check()!!
             id++
-            InsertAuth.insert(id, user.id)
+            InsertAuth.insert(id, user.userId)
             return user
         }
         return null

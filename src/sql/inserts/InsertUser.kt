@@ -10,10 +10,10 @@ object InsertUser {
         try {
             val conn = Connection.connection
             val newCustomerStatement = conn.prepareStatement("INSERT INTO mpiDB.USERS VALUES ( ?, ?, ?,?, ?, ? )")
-            newCustomerStatement.setInt(1, user.id)
+            newCustomerStatement.setInt(1, user.userId)
             newCustomerStatement.setString(2, user.login)
             newCustomerStatement.setString(3, user.password)
-            newCustomerStatement.setInt(4, user.role.id)
+            newCustomerStatement.setInt(4, user.role.roleId)
             newCustomerStatement.setString(5, user.username)
             newCustomerStatement.setString(6, user.cell)
             newCustomerStatement.execute()

@@ -2,4 +2,4 @@ package com.pavlouha.models
 
 import java.io.Serializable
 
-class Role(var id: Int, var title: String) : Serializable
+class Role(var roleId: Int, var title: String) : Serializable

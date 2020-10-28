@@ -64,9 +64,9 @@ fun Application.module(testing: Boolean = false) {
                 println("${user.name}, pwd = ${user.password}")
                 val token = JwtConfig.generateToken(user)
 
-                call.respond(mapOf("token" to token, "id" to result.id, "login" to result.login,
+                call.respond(mapOf("token" to token, "id" to result.userId, "login" to result.login,
                 "password" to result.password, "username" to result.username, "cell" to result.cell,
-                "roleId" to result.role.id, "title" to result.role.title))
+                "roleId" to result.role.roleId, "title" to result.role.title))
             }
         }
 
