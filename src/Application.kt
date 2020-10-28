@@ -142,15 +142,13 @@ fun Application.module(testing: Boolean = false) {
             post("/user") {
                 val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
                 val login = parameters["login"]
                 val password = parameters["password"]
                 val roleId = parameters["roleId"]!!.toInt()
-                val roleName = parameters["roleName"]
                 val username = parameters["username"]
                 val cell = parameters["cell"]
 
-                call.respond(UserDao.insert(User(id, login!!, username!!, password!!, Role(roleId, roleName!!), cell!!)))
+                call.respond(UserDao.insert(login!!, username!!, roleId, password!!, cell!!))
             }
 
             delete("/user") {

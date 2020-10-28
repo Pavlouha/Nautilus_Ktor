@@ -1,7 +1,9 @@
 package com.pavlouha.dao
 
+import com.pavlouha.models.Role
 import com.pavlouha.models.User
 import com.pavlouha.sql.counters.AuthCounter
+import com.pavlouha.sql.counters.UserCounter
 import com.pavlouha.sql.deletes.UserDelete
 import com.pavlouha.sql.inserts.InsertAuth
 import com.pavlouha.sql.inserts.InsertUser
@@ -15,8 +17,10 @@ object UserDao {
         return UserList.userList()
     }
 
-    fun insert(user: User): Boolean {
-        return InsertUser.insert(user)
+    fun insert(login: String, password: String, roleId: Int, username: String, cell: String): Boolean {
+        var id = UserCounter.check()
+        id++
+        return InsertUser.insert(User(id, login, username, password, Role(roleId, ""), cell))
     }
 
     fun delete(id: Int): Boolean {
