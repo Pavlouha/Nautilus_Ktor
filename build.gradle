@@ -12,7 +12,7 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.pavlouha'
-version '0.0.4'
+version '0.0.5'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
 sourceSets {
@@ -71,4 +71,5 @@ dependencies {
     compile "io.ktor:ktor-network:$ktor_version"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     compile ("mysql:mysql-connector-java:8.0.21")
+    compile group: 'com.urbanairship', name: 'java-client', version: '6.1.0'
 }

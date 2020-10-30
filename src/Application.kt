@@ -3,7 +3,11 @@ package com.pavlouha
 import com.pavlouha.dao.*
 import com.pavlouha.jwtThings.JwtConfig
 import com.pavlouha.jwtThings.model.JwtUser
-import com.pavlouha.models.*
+import com.pavlouha.models.Customer
+import com.pavlouha.models.Order
+import com.pavlouha.models.OrderReviewState
+import com.pavlouha.models.OrderState
+import com.urbanairship.api.client.UrbanAirshipClient
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -30,7 +34,7 @@ fun Application.module(testing: Boolean = false) {
                 val name = it.payload.getClaim("name").asString()
                 val password = it.payload.getClaim("password").asString()
                 if(name != null && password != null){
-                    JwtUser(name, password )
+                    JwtUser(name, password)
                 }else{
                     null
                 }
@@ -51,6 +55,11 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    val pushClient = UrbanAirshipClient.newBuilder()
+        .setKey("L5xur5MgQ4WcdTno7XALxA")
+        .setSecret("rXhQ5XVjR32DPzpcujUQTg")
+        .build()
+
     routing {
         get("/") {
             call.respondText("HELLO, WORLD!", contentType = ContentType.Text.Plain)
@@ -64,9 +73,13 @@ fun Application.module(testing: Boolean = false) {
                 println("${user.name}, pwd = ${user.password}")
                 val token = JwtConfig.generateToken(user)
 
-                call.respond(mapOf("token" to token, "id" to result.userId, "login" to result.login,
-                "password" to result.password, "username" to result.username, "cell" to result.cell,
-                "roleId" to result.role.roleId, "title" to result.role.title))
+                call.respond(
+                    mapOf(
+                        "token" to token, "id" to result.userId, "login" to result.login,
+                        "password" to result.password, "username" to result.username, "cell" to result.cell,
+                        "roleId" to result.role.roleId, "title" to result.role.title
+                    )
+                )
             }
         }
 
@@ -128,6 +141,8 @@ fun Application.module(testing: Boolean = false) {
             patch("/guninorder") {
                 val parameters = call.receiveParameters()
 
+                //TODO сделать уведомление
+
                 val orderId = parameters["orderId"]?.toInt()
                 val stateId = parameters["stateId"]?.toInt()
                 call.respond(GunInOrderDao.update(orderId!!, stateId!!))
@@ -176,14 +191,23 @@ fun Application.module(testing: Boolean = false) {
 
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
-                call.respond(OrderDao.insert(Order(
-                    id, Customer(customerId, "", "", ""),
-                    commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, "")
-                )))
+                //TODO сделать уведомление
+
+                call.respond(
+                    OrderDao.insert(
+                        Order(
+                            id, Customer(customerId, "", "", ""),
+                            commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, ""),
+                            OrderReviewState(0, "")
+                        )
+                    )
+                )
             }
 
             patch("/order") {
                 val parameters = call.receiveParameters()
+
+                //TODO сделать уведомление
 
                 val id = parameters["id"]!!.toInt()
                 val stateId = parameters["stateId"]?.toInt()
