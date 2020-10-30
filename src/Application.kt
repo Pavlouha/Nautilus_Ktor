@@ -142,6 +142,8 @@ fun Application.module(testing: Boolean = false) {
             post("/user") {
                 val parameters = call.receiveParameters()
 
+                println(parameters)
+
                 val login = parameters["login"]
                 val password = parameters["password"]
                 val roleId = parameters["roleId"]!!.toInt()
@@ -189,8 +191,7 @@ fun Application.module(testing: Boolean = false) {
             }
 
             /** ROLE */
-            patch("/role") {
-
+            get("/role") {
                 call.respond(RoleDao.get())
             }
         }
