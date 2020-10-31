@@ -18,7 +18,7 @@ object AuthList {
                     "mpiDB.USERS.USERNAME FROM mpiDB.AUTHS\n" +
                     "LEFT JOIN mpiDB.USERS on mpiDB.AUTHS.USER_ID = mpiDB.USERS.ID;")
             while (authSet.next()) {
-                auths.add(AuthClass(authSet.getInt("ID"), authSet.getDate("LOGIN_DATE"),
+                auths.add(AuthClass(authSet.getInt("ID"), authSet.getString("LOGIN_DATE"),
                         authSet.getString("USERNAME"), authSet.getInt("USER_ID")))
             }
         } catch (e: Exception) {

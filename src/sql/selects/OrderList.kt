@@ -31,7 +31,7 @@ object OrderList {
                                 resultSet.getString("CLIENT"), resultSet.getString("COORDS"),
                                 resultSet.getString("CONNECTION")), resultSet.getString("COMMENTARY"),
                                 resultSet.getInt("USER_ID"), resultSet.getString("USERNAME"),
-                                resultSet.getDate("ORDERDATE"), OrderState(resultSet.getInt("ORDER_STATE_ID"),
+                                resultSet.getString("ORDERDATE"), OrderState(resultSet.getInt("ORDER_STATE_ID"),
                                 resultSet.getString("ORDER_STATE.STATE"),),
                                 OrderReviewState(resultSet.getInt("ORDER_REVIEW_STATE_ID"),
                                         resultSet.getString("ORDER_REVIEW_STATE.STATE")))

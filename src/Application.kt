@@ -219,7 +219,7 @@ fun Application.module(testing: Boolean = false) {
 
                 val result = OrderDao.insert(
                         Order(id, Customer(customerId, "", "", ""),
-                                commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, ""),
+                                commentary!!, userId, "", orderDate!!, OrderState(0, ""),
                                 OrderReviewState(0, "")))
 
                 if (result) {
