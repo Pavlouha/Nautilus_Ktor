@@ -7,7 +7,15 @@ import com.pavlouha.models.Customer
 import com.pavlouha.models.Order
 import com.pavlouha.models.OrderReviewState
 import com.pavlouha.models.OrderState
+import com.urbanairship.api.client.Response
 import com.urbanairship.api.client.UrbanAirshipClient
+import com.urbanairship.api.push.PushRequest
+import com.urbanairship.api.push.model.DeviceType
+import com.urbanairship.api.push.model.DeviceTypeData
+import com.urbanairship.api.push.model.PushPayload
+import com.urbanairship.api.push.model.PushResponse
+import com.urbanairship.api.push.model.audience.Selectors
+import com.urbanairship.api.push.model.notification.Notifications
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.auth.jwt.*
@@ -17,6 +25,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import java.io.IOException
 import java.sql.Date
 import java.text.SimpleDateFormat
 
@@ -141,11 +150,28 @@ fun Application.module(testing: Boolean = false) {
             patch("/guninorder") {
                 val parameters = call.receiveParameters()
 
-                //TODO сделать уведомление
-
                 val orderId = parameters["orderId"]?.toInt()
                 val stateId = parameters["stateId"]?.toInt()
-                call.respond(GunInOrderDao.update(orderId!!, stateId!!))
+
+                val result = GunInOrderDao.update(orderId!!, stateId!!)
+
+                if (result) {
+                    val payload = PushPayload.newBuilder()
+                        .setAudience(Selectors.androidChannel("customChannel"))
+                        .setNotification(Notifications.alert("Hey! Order #$orderId is changed. Please, review!"))
+                        .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
+                        .build()
+
+                    val request = PushRequest.newRequest(payload)
+
+                    try {
+                       val response = pushClient.execute(request)
+                    } catch (e: IOException) {
+                        println(e.stackTrace)
+                    }
+                }
+
+                call.respond(result)
             }
 
             /** USER */
@@ -191,17 +217,28 @@ fun Application.module(testing: Boolean = false) {
 
                 val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
-                //TODO сделать уведомление
+                val result = OrderDao.insert(
+                        Order(id, Customer(customerId, "", "", ""),
+                                commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, ""),
+                                OrderReviewState(0, "")))
 
-                call.respond(
-                    OrderDao.insert(
-                        Order(
-                            id, Customer(customerId, "", "", ""),
-                            commentary!!, userId, "", formatter.parse(orderDate) as Date, OrderState(0, ""),
-                            OrderReviewState(0, "")
-                        )
-                    )
-                )
+                if (result) {
+                    val payload = PushPayload.newBuilder()
+                            .setAudience(Selectors.androidChannel("customChannel"))
+                            .setNotification(Notifications.alert("New order is appeared"))
+                            .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
+                            .build()
+
+                    val request = PushRequest.newRequest(payload)
+
+                    try {
+                        val response = pushClient.execute(request)
+                    } catch (e: IOException) {
+                        println(e.stackTrace)
+                    }
+                }
+
+                call.respond(result)
             }
 
             patch("/order") {
@@ -211,7 +248,26 @@ fun Application.module(testing: Boolean = false) {
 
                 val id = parameters["id"]!!.toInt()
                 val stateId = parameters["stateId"]?.toInt()
-                call.respond(OrderDao.updateState(id, stateId!!))
+
+                val result = OrderDao.updateState(id, stateId!!)
+
+                if (result) {
+                    val payload = PushPayload.newBuilder()
+                            .setAudience(Selectors.androidChannel("customChannel"))
+                            .setNotification(Notifications.alert("Order #$id is updated now! Check this!"))
+                            .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
+                            .build()
+
+                    val request = PushRequest.newRequest(payload)
+
+                    try {
+                        val response = pushClient.execute(request)
+                    } catch (e: IOException) {
+                        println(e.stackTrace)
+                    }
+                }
+
+                call.respond(result)
             }
 
             /** ROLE */
