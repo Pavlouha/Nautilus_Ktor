@@ -5,15 +5,15 @@ import com.pavlouha.sql.Connection
 
 object InsertOrder {
 
-    fun insert(order: Order): Boolean {
+    fun insert(orderId: Int, customerId: Int, commentary: String, userId: Int): Boolean {
         var response = false
         try {
             val conn = Connection.connection
             val newCustomerStatement = conn.prepareStatement("INSERT INTO mpiDB.ORDERS VALUES ( ?, ?, ?,?, CURRENT_TIMESTAMP, ?, ? )")
-            newCustomerStatement.setInt(1, order.orderId)
-            newCustomerStatement.setInt(2, order.customer.customerId)
-            newCustomerStatement.setString(3, order.commentary)
-            newCustomerStatement.setInt(4, order.userId)
+            newCustomerStatement.setInt(1, orderId)
+            newCustomerStatement.setInt(2, customerId)
+            newCustomerStatement.setString(3, commentary)
+            newCustomerStatement.setInt(4, userId)
             newCustomerStatement.setInt(5, 0)
             newCustomerStatement.setInt(6, 0)
             newCustomerStatement.execute()

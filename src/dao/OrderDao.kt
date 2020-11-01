@@ -1,8 +1,10 @@
 package com.pavlouha.dao
 
 import com.pavlouha.models.Order
+import com.pavlouha.sql.counters.OrderCounter
 import com.pavlouha.sql.inserts.InsertOrder
 import com.pavlouha.sql.selects.OrderList
+import com.pavlouha.sql.selects.OrdersNotCancelledList
 import com.pavlouha.sql.updates.UpdateOrderReviewState
 import com.pavlouha.sql.updates.UpdateOrderState
 import java.util.ArrayList
@@ -13,6 +15,10 @@ object OrderDao {
         return OrderList.list()
     }
 
+    fun getNotCancelled(): ArrayList<Order?> {
+        return OrdersNotCancelledList.list()
+    }
+
     fun updateState(id: Int, stateId: Int): Boolean {
         return UpdateOrderState.update(id, stateId)
     }
@@ -21,7 +27,9 @@ object OrderDao {
         return UpdateOrderReviewState.update(id, orderReviewStateId)
     }
 
-    fun insert(order: Order): Boolean {
-        return InsertOrder.insert(order)
+    fun insert(customerId: Int, commentary: String, userId: Int): Boolean {
+        var id = OrderCounter.check()
+        id++
+        return InsertOrder.insert(id, customerId, commentary, userId)
     }
 }

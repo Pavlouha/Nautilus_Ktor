@@ -5,9 +5,9 @@ import java.sql.Statement
 
 object CustomerCounter {
 
-    fun check(): Int? {
+    fun check(): Int {
         val st: Statement?
-        var counter: Int? = null
+        var counter: Int = -1
         try {
             val conn = Connection.connection
             st = conn.createStatement()

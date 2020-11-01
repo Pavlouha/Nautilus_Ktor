@@ -66,7 +66,7 @@ fun Application.module(testing: Boolean = false) {
 
     val pushClient = UrbanAirshipClient.newBuilder()
         .setKey("L5xur5MgQ4WcdTno7XALxA")
-        .setSecret("rXhQ5XVjR32DPzpcujUQTg")
+        .setSecret("NnkF8PWCTqqpzQElVFn8pA")
         .build()
 
     routing {
@@ -206,21 +206,18 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(OrderDao.get())
             }
 
+            get("ordernotcancelled") {
+                call.respond(OrderDao.getNotCancelled())
+            }
+
             post("/order") {
                 val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
                 val customerId = parameters["customerId"]!!.toInt()
-                val commentary = parameters["commentary"]
+                val commentary = parameters["commentary"]!!
                 val userId = parameters["userId"]!!.toInt()
-                val orderDate = parameters["orderDate"]
 
-                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-
-                val result = OrderDao.insert(
-                        Order(id, Customer(customerId, "", "", ""),
-                                commentary!!, userId, "", orderDate!!, OrderState(0, ""),
-                                OrderReviewState(0, "")))
+                val result = OrderDao.insert(customerId, commentary, userId)
 
                 if (result) {
                     val payload = PushPayload.newBuilder()
@@ -298,6 +295,21 @@ fun Application.module(testing: Boolean = false) {
             /** ROLE */
             get("/role") {
                 call.respond(RoleDao.get())
+            }
+
+            /** CUSTOMERS */
+            get("/customer") {
+                call.respond(CustomerDao.get())
+            }
+
+            post("/customer") {
+                val parameters = call.receiveParameters()
+
+                val clientName = parameters["client"]
+                val coords = parameters["coords"]
+                val connection = parameters["connection"]
+
+                call.respond(CustomerDao.insert(clientName!!, coords!!, connection!!))
             }
         }
     }
