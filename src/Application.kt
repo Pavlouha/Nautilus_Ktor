@@ -137,9 +137,9 @@ fun Application.module(testing: Boolean = false) {
             }
 
             /** GUNINORDER */
-            get("/guninorder") {
+            post("/guninorder") {
                 val parameters = call.receiveParameters()
-
+                        // гет запрос в обличье пост
                 val id = parameters["id"]
                 if (id != null) {
                     call.respond(GunInOrderDao.get(id.toInt()))
@@ -244,8 +244,6 @@ fun Application.module(testing: Boolean = false) {
             patch("/order") {
                 val parameters = call.receiveParameters()
 
-                //TODO сделать уведомление
-
                 val id = parameters["id"]!!.toInt()
                 val stateId = parameters["stateId"]?.toInt()
 
@@ -254,7 +252,34 @@ fun Application.module(testing: Boolean = false) {
                 if (result) {
                     val payload = PushPayload.newBuilder()
                             .setAudience(Selectors.androidChannel("customChannel"))
-                            .setNotification(Notifications.alert("Order #$id is updated now! Check this!"))
+                            .setNotification(Notifications.alert("Order State #$id is updated now! Check this!"))
+                            .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
+                            .build()
+
+                    val request = PushRequest.newRequest(payload)
+
+                    try {
+                        val response = pushClient.execute(request)
+                    } catch (e: IOException) {
+                        println(e.stackTrace)
+                    }
+                }
+
+                call.respond(result)
+            }
+
+            patch("/revieworder") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+                val stateId = parameters["orderReviewStateId"]?.toInt()
+
+                val result = OrderDao.updateReviewState(id, stateId!!)
+
+                if (result) {
+                    val payload = PushPayload.newBuilder()
+                            .setAudience(Selectors.androidChannel("customChannel"))
+                            .setNotification(Notifications.alert("Order #$id reviewed!"))
                             .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
                             .build()
 
