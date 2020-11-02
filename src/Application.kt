@@ -147,6 +147,16 @@ fun Application.module(testing: Boolean = false) {
                 // id?.let { it1 -> GunInOrderDao.get(it1) }?.let { it2 -> call.respond(it2) }
             }
 
+            post("/newguninorder") {
+                val parameters = call.receiveParameters()
+                //  настоящий пост запрос
+                val gunId = parameters["gunId"]!!.toInt()
+                val quantity = parameters["quantity"]!!.toInt()
+                val sum = parameters["sum"]!!.toInt()
+                val orderId = parameters["orderId"]!!.toInt()
+                call.respond(GunInOrderDao.insert(gunId, quantity,sum, orderId))
+            }
+
             patch("/guninorder") {
                 val parameters = call.receiveParameters()
 
@@ -170,7 +180,6 @@ fun Application.module(testing: Boolean = false) {
                         println(e.stackTrace)
                     }
                 }
-
                 call.respond(result)
             }
 
@@ -219,7 +228,7 @@ fun Application.module(testing: Boolean = false) {
 
                 val result = OrderDao.insert(customerId, commentary, userId)
 
-                if (result) {
+                if (result > 0) {
                     val payload = PushPayload.newBuilder()
                             .setAudience(Selectors.androidChannel("customChannel"))
                             .setNotification(Notifications.alert("New order is appeared"))
@@ -310,6 +319,14 @@ fun Application.module(testing: Boolean = false) {
                 val connection = parameters["connection"]
 
                 call.respond(CustomerDao.insert(clientName!!, coords!!, connection!!))
+            }
+
+            delete("/customer") {
+                val parameters = call.receiveParameters()
+
+                val id = parameters["id"]!!.toInt()
+
+                call.respond(CustomerDao.delete(id))
             }
         }
     }

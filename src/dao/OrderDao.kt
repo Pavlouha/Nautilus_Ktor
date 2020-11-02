@@ -27,9 +27,13 @@ object OrderDao {
         return UpdateOrderReviewState.update(id, orderReviewStateId)
     }
 
-    fun insert(customerId: Int, commentary: String, userId: Int): Boolean {
+    fun insert(customerId: Int, commentary: String, userId: Int): Int {
         var id = OrderCounter.check()
         id++
-        return InsertOrder.insert(id, customerId, commentary, userId)
+        val b = InsertOrder.insert(id, customerId, commentary, userId)
+        if (b) {
+            return id
+        }
+        return -1
     }
 }
