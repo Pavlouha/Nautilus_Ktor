@@ -51,6 +51,17 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    install(CORS) {
+        method(HttpMethod.Options)
+        method(HttpMethod.Put)
+        method(HttpMethod.Delete)
+        method(HttpMethod.Patch)
+        method(HttpMethod.Get)
+        // Beware that this is not recommended for production,
+        // but I'm just using it during development
+        anyHost()
+    }
+
     /* install(HttpsRedirect) {
         // The port to redirect to. By default 443, the default HTTPS port.
         sslPort = 443
@@ -81,7 +92,6 @@ fun Application.module(testing: Boolean = false) {
             if (result != null) {
                 println("${user.name}, pwd = ${user.password}")
                 val token = JwtConfig.generateToken(user)
-
                 call.respond(
                     mapOf(
                         "token" to token, "id" to result.userId, "login" to result.login,
@@ -200,7 +210,7 @@ fun Application.module(testing: Boolean = false) {
                 val username = parameters["username"]
                 val cell = parameters["cell"]
 
-                call.respond(UserDao.insert(login!!, username!!, roleId, password!!, cell!!))
+                call.respond(UserDao.insert(login!!, password!!, roleId, username!!, cell!!))
             }
 
             delete("/user") {

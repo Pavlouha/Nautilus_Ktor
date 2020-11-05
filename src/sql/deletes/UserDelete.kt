@@ -12,7 +12,7 @@ object UserDelete {
         try {
             val conn = Connection.connection
             st = conn.createStatement()
-            st.executeQuery("DELETE FROM mpiDB.USERS WHERE 'ID' = $id")
+            st.executeQuery("DELETE FROM mpiDB.USERS WHERE 'mpiDB.USERS.ID' = $id")
             response = true
         } catch (e: Exception) {
             println(e.printStackTrace())
