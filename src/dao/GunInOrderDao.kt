@@ -6,6 +6,7 @@ import com.pavlouha.models.GunState
 import com.pavlouha.sql.counters.GunInOrderCounter
 import com.pavlouha.sql.inserts.InsertGunInOrder
 import com.pavlouha.sql.selects.GunInOrderByOrderList
+import com.pavlouha.sql.selects.GunInOrderForCustomerList
 import com.pavlouha.sql.updates.UpdateGunInOrderState
 import java.util.ArrayList
 
@@ -13,6 +14,10 @@ object GunInOrderDao {
 
     fun get(id: Int): ArrayList<GunInOrder> {
         return GunInOrderByOrderList.list(id)
+    }
+
+    fun getAllGIO(): ArrayList<GunInOrder> {
+        return GunInOrderForCustomerList.list()
     }
 
     fun update(orderId: Int, stateId: Int): Boolean {

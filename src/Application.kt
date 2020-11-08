@@ -130,20 +130,17 @@ fun Application.module(testing: Boolean = false) {
                 val parameters = call.receiveParameters()
 
                 val vendorCode = parameters["vendorCode"]
-                val price = parameters["price"]?.toInt()
+                val price = parameters["price"]!!.toInt()
 
-                vendorCode?.let { it1 ->
-                    if (price != null) {
-                        GunDao.insert(it1, price)
-                    }
-                }?.let { it2 -> call.respond(it2) }
+                call.respond(GunDao.insert(vendorCode!!, price))
             }
 
             delete("/gun") {
                 val parameters = call.receiveParameters()
 
-                val id = parameters["id"]?.toInt()
-                id?.let { it1 -> GunDao.delete(it1) }?.let { it2 -> call.respond(it2) }
+                val id = parameters["id"]!!.toInt()
+
+                call.respond(GunDao.delete(id))
             }
 
             /** GUNINORDER */
@@ -154,8 +151,12 @@ fun Application.module(testing: Boolean = false) {
                 if (id != null) {
                     call.respond(GunInOrderDao.get(id.toInt()))
                 }
-                // id?.let { it1 -> GunInOrderDao.get(it1) }?.let { it2 -> call.respond(it2) }
             }
+
+            get("/guninorder") {
+                //Получаем все ганинордеры, без условий
+            call.respond(GunInOrderDao.getAllGIO())
+        }
 
             post("/newguninorder") {
                 val parameters = call.receiveParameters()
