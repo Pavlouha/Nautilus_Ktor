@@ -52,14 +52,17 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(CORS) {
+
         method(HttpMethod.Options)
         method(HttpMethod.Put)
         method(HttpMethod.Delete)
         method(HttpMethod.Patch)
-        method(HttpMethod.Get)
+        header(HttpHeaders.Authorization)
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
+        anyHost()
         // Beware that this is not recommended for production,
         // but I'm just using it during development
-        anyHost()
     }
 
     /* install(HttpsRedirect) {
