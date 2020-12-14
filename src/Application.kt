@@ -3,17 +3,11 @@ package com.pavlouha
 import com.pavlouha.dao.*
 import com.pavlouha.jwtThings.JwtConfig
 import com.pavlouha.jwtThings.model.JwtUser
-import com.pavlouha.models.Customer
-import com.pavlouha.models.Order
-import com.pavlouha.models.OrderReviewState
-import com.pavlouha.models.OrderState
-import com.urbanairship.api.client.Response
 import com.urbanairship.api.client.UrbanAirshipClient
 import com.urbanairship.api.push.PushRequest
 import com.urbanairship.api.push.model.DeviceType
 import com.urbanairship.api.push.model.DeviceTypeData
 import com.urbanairship.api.push.model.PushPayload
-import com.urbanairship.api.push.model.PushResponse
 import com.urbanairship.api.push.model.audience.Selectors
 import com.urbanairship.api.push.model.notification.Notifications
 import io.ktor.application.*
@@ -26,8 +20,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import java.io.IOException
-import java.sql.Date
-import java.text.SimpleDateFormat
 
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -93,7 +85,7 @@ fun Application.module(testing: Boolean = false) {
             val user = call.receive<JwtUser>()
             val result = UserDao.authenticate(user.name, user.password)
             if (result != null) {
-                println("${user.name}, pwd = ${user.password}")
+                println("Logged in as ${user.name}, pwd = ${user.password}")
                 val token = JwtConfig.generateToken(user)
                 call.respond(
                     mapOf(
@@ -133,9 +125,9 @@ fun Application.module(testing: Boolean = false) {
                 val parameters = call.receiveParameters()
 
                 val vendorCode = parameters["vendorCode"]
-                val price = parameters["price"]!!.toInt()
+                val price = parameters["price"]?.toInt()
 
-                call.respond(GunDao.insert(vendorCode!!, price))
+                call.respond(GunDao.insert(vendorCode!!, price!!))
             }
 
             delete("/gun") {
