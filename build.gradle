@@ -12,7 +12,7 @@ apply plugin: 'kotlin'
 apply plugin: 'application'
 
 group 'com.pavlouha'
-version '0.0.7'
+version '0.0.8'
 mainClassName = "io.ktor.server.netty.EngineMain"
 
 sourceSets {
@@ -39,7 +39,7 @@ dependencies {
     implementation "io.ktor:ktor-network:$ktor_version"
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     implementation ("mysql:mysql-connector-java:8.0.21")
-
+    implementation 'com.auth0:java-jwt:3.11.0'
 }
 
 //create a single Jar with all dependencies

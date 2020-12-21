@@ -20,12 +20,13 @@ object JwtConfig {
 
     /** Produce a token for this combination of name and password */
 
-    fun generateToken(user: JwtUser): String = JWT.create()
+    fun generateToken(user: JwtUser, role: Int): String = JWT.create()
         .withSubject("Authentication")
         .withIssuer(issuer)
         .withClaim("name", user.name)
-        .withClaim("password", user.password)
-        .withExpiresAt(getExpiration())  // optional
+       // .withClaim("password", user.password)
+        .withClaim("role", role)
+        .withExpiresAt(getExpiration())
         .sign(algorithm)
 
 

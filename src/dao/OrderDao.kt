@@ -20,6 +20,9 @@ object OrderDao {
     }
 
     fun updateState(id: Int, stateId: Int): Boolean {
+        if (stateId==5) {
+            GunInOrderDao.update(id, 4)
+        }
         return UpdateOrderState.update(id, stateId)
     }
 

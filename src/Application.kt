@@ -1,6 +1,7 @@
 package com.pavlouha
 
 import com.pavlouha.dao.*
+import com.pavlouha.jwtThings.Decoder
 import com.pavlouha.jwtThings.JwtConfig
 import com.pavlouha.jwtThings.model.JwtUser
 import com.urbanairship.api.client.UrbanAirshipClient
@@ -53,8 +54,6 @@ fun Application.module(testing: Boolean = false) {
         allowCredentials = true
         allowNonSimpleContentTypes = true
         anyHost()
-        // Beware that this is not recommended for production,
-        // but I'm just using it during development
     }
 
     /* install(HttpsRedirect) {
@@ -81,12 +80,13 @@ fun Application.module(testing: Boolean = false) {
         }
 
         /** TOKEN GEN */
+        /** ALL */
         post("/generatetoken"){
             val user = call.receive<JwtUser>()
             val result = UserDao.authenticate(user.name, user.password)
             if (result != null) {
                 println("Logged in as ${user.name}, pwd = ${user.password}")
-                val token = JwtConfig.generateToken(user)
+                val token = JwtConfig.generateToken(user, result.role.roleId)
                 call.respond(
                     mapOf(
                         "token" to token, "id" to result.userId, "login" to result.login,
@@ -94,6 +94,8 @@ fun Application.module(testing: Boolean = false) {
                         "roleId" to result.role.roleId, "title" to result.role.title
                     )
                 )
+            } else {
+                print("Wrong login with ${user.name} and ${user.password}")
             }
         }
 
@@ -108,12 +110,23 @@ fun Application.module(testing: Boolean = false) {
             }
 
             /** AUTH TABLE */
+            /** CAPTAIN */
             get("/auths") {
-                call.respond(AuthDao.get())
+
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 0) {
+                    call.respond(AuthDao.get())
+                }
+
             }
 
+            /** CAPTAIN */
             delete("/auths") {
-                call.respond(AuthDao.delete())
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 0) {
+                    call.respond(AuthDao.delete())
+                }
+
             }
 
             /** GUN */
@@ -121,72 +134,96 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(GunDao.get())
             }
 
+            /** GUNSMITH */
             post("/gun") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 3) {
+                    val parameters = call.receiveParameters()
 
-                val vendorCode = parameters["vendorCode"]
-                val price = parameters["price"]?.toInt()
+                    val vendorCode = parameters["vendorCode"]
+                    val price = parameters["price"]?.toInt()
 
-                call.respond(GunDao.insert(vendorCode!!, price!!))
+                    call.respond(GunDao.insert(vendorCode!!, price!!))
+                }
+
             }
 
+            /** GUNSMITH */
             delete("/gun") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 3) {
+                    val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
+                    val id = parameters["id"]!!.toInt()
 
-                call.respond(GunDao.delete(id))
+                    call.respond(GunDao.delete(id))
+                }
             }
 
             /** GUNINORDER */
             post("/guninorder") {
+
                 val parameters = call.receiveParameters()
-                        // гет запрос в обличье пост
+                        // гет запрос в обличье пост, получаем ордер по айди
                 val id = parameters["id"]
                 if (id != null) {
                     call.respond(GunInOrderDao.get(id.toInt()))
                 }
             }
 
+            /** GUNSMITH */
             get("/guninorder") {
                 //Получаем все ганинордеры, без условий
-            call.respond(GunInOrderDao.getAllGIO())
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 3) {
+                    call.respond(GunInOrderDao.getAllGIO())
+                }
+
         }
 
+            /** CONSPIRATOR */
             post("/newguninorder") {
-                val parameters = call.receiveParameters()
-                //  настоящий пост запрос
-                val gunId = parameters["gunId"]!!.toInt()
-                val quantity = parameters["quantity"]!!.toInt()
-                val sum = parameters["sum"]!!.toInt()
-                val orderId = parameters["orderId"]!!.toInt()
-                call.respond(GunInOrderDao.insert(gunId, quantity,sum, orderId))
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 1) {
+                    val parameters = call.receiveParameters()
+                    //  настоящий пост запрос
+                    val gunId = parameters["gunId"]!!.toInt()
+                    val quantity = parameters["quantity"]!!.toInt()
+                    val sum = parameters["sum"]!!.toInt()
+                    val orderId = parameters["orderId"]!!.toInt()
+                    call.respond(GunInOrderDao.insert(gunId, quantity, sum, orderId))
+                }
             }
 
+            /** STOREKEEPER */
+            /** GUNSMITH */
             patch("/guninorder") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if ((Decoder.decode(token) == 2) || (Decoder.decode(token) == 3)) {
+                    val parameters = call.receiveParameters()
 
-                val orderId = parameters["orderId"]?.toInt()
-                val stateId = parameters["stateId"]?.toInt()
+                    val orderId = parameters["orderId"]?.toInt()
+                    val stateId = parameters["stateId"]?.toInt()
 
-                val result = GunInOrderDao.update(orderId!!, stateId!!)
+                    val result = GunInOrderDao.update(orderId!!, stateId!!)
 
-                if (result) {
-                    val payload = PushPayload.newBuilder()
-                        .setAudience(Selectors.androidChannel("customChannel"))
-                        .setNotification(Notifications.alert("Hey! Order #$orderId is changed. Please, review!"))
-                        .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
-                        .build()
+                    if (result) {
+                        val payload = PushPayload.newBuilder()
+                            .setAudience(Selectors.androidChannel("customChannel"))
+                            .setNotification(Notifications.alert("Hey! Order #$orderId is changed. Please, review!"))
+                            .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
+                            .build()
 
-                    val request = PushRequest.newRequest(payload)
+                        val request = PushRequest.newRequest(payload)
 
-                    try {
-                       val response = pushClient.execute(request)
-                    } catch (e: IOException) {
-                        println(e.stackTrace)
+                        try {
+                            val response = pushClient.execute(request)
+                        } catch (e: IOException) {
+                            println(e.stackTrace)
+                        }
                     }
+                    call.respond(result)
                 }
-                call.respond(result)
             }
 
             /** USER */
@@ -195,25 +232,35 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(UserDao.get())
             }
 
+            /** CAPTAIN */
             post("/user") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 0) {
+                    val parameters = call.receiveParameters()
 
-                println(parameters)
+                    println(parameters)
 
-                val login = parameters["login"]
-                val password = parameters["password"]
-                val roleId = parameters["roleId"]!!.toInt()
-                val username = parameters["username"]
-                val cell = parameters["cell"]
+                    val login = parameters["login"]
+                    val password = parameters["password"]
+                    val roleId = parameters["roleId"]!!.toInt()
+                    val username = parameters["username"]
+                    val cell = parameters["cell"]
 
-                call.respond(UserDao.insert(login!!, password!!, roleId, username!!, cell!!))
+                    call.respond(UserDao.insert(login!!, password!!, roleId, username!!, cell!!))
+                }
+
+
             }
 
+            /** CAPTAIN */
             delete("/user") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 0) {
+                    val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
-                call.respond(UserDao.delete(id))
+                    val id = parameters["id"]!!.toInt()
+                    call.respond(UserDao.delete(id))
+                }
             }
 
             /** ORDER */
@@ -225,32 +272,37 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(OrderDao.getNotCancelled())
             }
 
+            /** CONSPIRATOR */
             post("/order") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 1) {
+                    val parameters = call.receiveParameters()
 
-                val customerId = parameters["customerId"]!!.toInt()
-                val commentary = parameters["commentary"]!!
-                val userId = parameters["userId"]!!.toInt()
+                    val customerId = parameters["customerId"]!!.toInt()
+                    val commentary = parameters["commentary"]!!
+                    val userId = parameters["userId"]!!.toInt()
 
-                val result = OrderDao.insert(customerId, commentary, userId)
+                    val result = OrderDao.insert(customerId, commentary, userId)
 
-                if (result > 0) {
-                    val payload = PushPayload.newBuilder()
+                    if (result > 0) {
+                        val payload = PushPayload.newBuilder()
                             .setAudience(Selectors.androidChannel("customChannel"))
                             .setNotification(Notifications.alert("New order is appeared"))
                             .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
                             .build()
 
-                    val request = PushRequest.newRequest(payload)
+                        val request = PushRequest.newRequest(payload)
 
-                    try {
-                        val response = pushClient.execute(request)
-                    } catch (e: IOException) {
-                        println(e.stackTrace)
+                        try {
+                            val response = pushClient.execute(request)
+                        } catch (e: IOException) {
+                            println(e.stackTrace)
+                        }
                     }
+
+                    call.respond(result)
                 }
 
-                call.respond(result)
             }
 
             patch("/order") {
@@ -280,31 +332,35 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(result)
             }
 
+            /** CAPTAIN */
             patch("/revieworder") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 0) {
+                    val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
-                val stateId = parameters["orderReviewStateId"]?.toInt()
+                    val id = parameters["id"]!!.toInt()
+                    val stateId = parameters["orderReviewStateId"]?.toInt()
 
-                val result = OrderDao.updateReviewState(id, stateId!!)
+                    val result = OrderDao.updateReviewState(id, stateId!!)
 
-                if (result) {
-                    val payload = PushPayload.newBuilder()
+                    if (result) {
+                        val payload = PushPayload.newBuilder()
                             .setAudience(Selectors.androidChannel("customChannel"))
                             .setNotification(Notifications.alert("Order #$id reviewed!"))
                             .setDeviceTypes(DeviceTypeData.of(DeviceType.ANDROID))
                             .build()
 
-                    val request = PushRequest.newRequest(payload)
+                        val request = PushRequest.newRequest(payload)
 
-                    try {
-                        val response = pushClient.execute(request)
-                    } catch (e: IOException) {
-                        println(e.stackTrace)
+                        try {
+                            val response = pushClient.execute(request)
+                        } catch (e: IOException) {
+                            println(e.stackTrace)
+                        }
                     }
-                }
 
-                call.respond(result)
+                    call.respond(result)
+                }
             }
 
             /** ROLE */
@@ -317,22 +373,32 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(CustomerDao.get())
             }
 
+            /** CONSPIRATOR */
             post("/customer") {
-                val parameters = call.receiveParameters()
 
-                val clientName = parameters["client"]
-                val coords = parameters["coords"]
-                val connection = parameters["connection"]
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 1) {
+                    val parameters = call.receiveParameters()
 
-                call.respond(CustomerDao.insert(clientName!!, coords!!, connection!!))
+                    val clientName = parameters["client"]
+                    val coords = parameters["coords"]
+                    val connection = parameters["connection"]
+
+                    call.respond(CustomerDao.insert(clientName!!, coords!!, connection!!))
+                }
             }
 
+            /** CONSPIRATOR */
             delete("/customer") {
-                val parameters = call.receiveParameters()
+                val token = call.request.authorization().toString()
+                if (Decoder.decode(token) == 1) {
+                    val parameters = call.receiveParameters()
 
-                val id = parameters["id"]!!.toInt()
+                    val id = parameters["id"]!!.toInt()
 
-                call.respond(CustomerDao.delete(id))
+                    call.respond(CustomerDao.delete(id))
+                }
+
             }
         }
     }
