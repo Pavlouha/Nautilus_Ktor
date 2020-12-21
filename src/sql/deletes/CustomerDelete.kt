@@ -5,17 +5,17 @@ import java.sql.Statement
 
 object CustomerDelete {
 
-    fun delete(id: Int): Boolean {
+    fun delete(id: Int): String {
         val st: Statement?
-        var response = false
+        var response = ""
         try {
             val conn = Connection.connection
             st = conn.createStatement()
             st.execute("DELETE FROM mpiDB.CUSTOMERS WHERE mpiDB.CUSTOMERS.ID = $id")
-            response = true
+            response = "true"
         } catch (e: Exception) {
             println(e.printStackTrace())
-            println("Delete Customer Error")
+            println("DeleteCustomer Error")
         }
         return response
     }

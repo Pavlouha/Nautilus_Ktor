@@ -1,6 +1,8 @@
 package com.pavlouha.dao
 
 import com.pavlouha.models.Gun
+import com.pavlouha.sql.checkUse.GunCheck
+import com.pavlouha.sql.checkUse.UserCheck
 import com.pavlouha.sql.counters.GunCounter
 import com.pavlouha.sql.deletes.GunDelete
 import com.pavlouha.sql.inserts.InsertGun
@@ -19,7 +21,12 @@ object GunDao {
         return InsertGun.insert(Gun(id, vendorCode, price))
     }
 
-    fun delete(id: Int): Boolean {
-        return GunDelete.delete(id)
+    fun delete(id: Int): String {
+        return if (!GunCheck.check(id)) {
+            GunDelete.delete(id)
+        } else {
+            "false"
+        }
+
     }
 }

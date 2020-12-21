@@ -5,14 +5,14 @@ import java.sql.Statement
 
 object GunDelete {
 
-    fun delete(id: Int): Boolean {
+    fun delete(id: Int): String {
         var st: Statement?
-        var response = false
+        var response = ""
         try {
             val conn = Connection.connection
             st = conn.createStatement()
             st.execute("DELETE FROM mpiDB.GUNS WHERE mpiDB.GUNS.ID = $id")
-            response = true
+            response = "true"
         } catch (e: Exception) {
             println(id)
             println(e.printStackTrace())

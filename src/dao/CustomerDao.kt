@@ -1,6 +1,7 @@
 package com.pavlouha.dao
 
 import com.pavlouha.models.Customer
+import com.pavlouha.sql.checkUse.CustomerCheck
 import com.pavlouha.sql.counters.CustomerCounter
 import com.pavlouha.sql.deletes.CustomerDelete
 import com.pavlouha.sql.inserts.InsertCustomer
@@ -19,8 +20,12 @@ object CustomerDao {
         return InsertCustomer.insert(Customer(id, client, coords, connection))
     }
 
-    fun delete(id: Int): Boolean {
-        return CustomerDelete.delete(id)
+    fun delete(id: Int): String {
+        return if (!CustomerCheck.check(id)) {
+            CustomerDelete.delete(id)
+        } else {
+            "false"
+        }
     }
 
 }
